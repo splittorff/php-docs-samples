@@ -21,18 +21,21 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Google\Cloud\BigQuery\BigQueryClient;
 
 /**
  * Command line utility to list BigQuery datasets.
+ *
+ * Usage: php bigquery.php datasets
  */
 class DatasetsCommand extends Command
 {
+    use ProjectIdTrait;
+
     protected function configure()
     {
         $this
             ->setName('datasets')
-            ->setDescription('List BigQuery datasets for a project')
+            ->setDescription('List BigQuery datasets')
             ->setHelp(<<<EOF
 The <info>%command.name%</info> command lists all the datasets associated with your project.
 
@@ -53,29 +56,8 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if (!$projectId = $input->getOption('project')) {
-            if (!$projectId = $this->getProjectIdFromGcloud()) {
-                throw new \Exception('Could not derive a project ID from gloud. ' .
-                    'You must supply a project ID using --project');
-            }
+            $projectId = $this->getProjectIdFromGcloud();
         }
-        $bigQuery = new BigQueryClient([
-            'projectId' => $projectId
-        ]);
-
-        # [START list_datasets]
-        $datasets = $bigQuery->datasets();
-        foreach ($datasets as $dataset) {
-            $output->writeln(sprintf('<info>%s</info>', $dataset->id()));
-        }
-        # [END list_datasets]
-    }
-
-    private function getProjectIdFromGcloud()
-    {
-        exec("gcloud config list --format 'value(core.project)' 2>/dev/null", $output, $return_var);
-
-        if (0 === $return_var) {
-            return array_pop($output);
-        }
+        list_datasets($projectId);
     }
 }

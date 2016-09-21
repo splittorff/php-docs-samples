@@ -22,7 +22,7 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
- * Unit Tests for ImportCommand
+ * Unit Tests for DatasetsCommand.
  */
 class DatasetsCommandTest extends \PHPUnit_Framework_TestCase
 {
@@ -57,6 +57,6 @@ class DatasetsCommandTest extends \PHPUnit_Framework_TestCase
             ['interactive' => false]
         );
 
-        $this->assertContains($datasetId, $commandTester->getDisplay());
+        $this->expectOutputRegex("/$datasetId/");
     }
 }
